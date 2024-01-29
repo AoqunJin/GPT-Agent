@@ -11,13 +11,20 @@ class DecoderOnly(nn.Module):
 
     __constants__ = ['norm']
 
-    def __init__(self, decoder_layer, num_layers, norm=None):
+    def __init__(self, num_layers=6, d_model=768, nhead=12, batch_first=True):
         super(DecoderOnly, self).__init__()
+
+        decoder_layer = DecoderOnlyLayer(
+                d_model=d_model,
+                nhead=nhead,
+                batch_first=batch_first
+            )
+
         self.layers = _get_clones(decoder_layer, num_layers)
         self._reset_parameters()
 
         self.num_layers = num_layers
-        self.norm = norm
+        self.norm = nn.LayerNorm(d_model, eps=1e-5)
 
     def forward(self, tgt: Tensor, tgt_key_padding_mask: Optional[Tensor] = None) -> Tensor:
 
