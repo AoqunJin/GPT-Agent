@@ -23,6 +23,7 @@ def embedding(clip_model, traspose, device, folder, file_list):
                 with open(binary_data_dir, "rb+") as f:
                     mdp_data = pickle.load(f)
                     obss = mdp_data["obss"]
+                    acts = mdp_data["acts"]
 
                     # encode image
                     for i in range(len(obss)):
@@ -30,10 +31,12 @@ def embedding(clip_model, traspose, device, folder, file_list):
                         # TODO unsqueeze(0) ▶ batch
                         norm_item = traspose(Image.fromarray(item.transpose(2, 0, 1), mode="RGB")).unsqueeze(0).to(device)
                         item = clip_model.encode_image(norm_item)
-                        obss[i] = item
+                        obss[i] = item.cpu()  # TODO .squeeze(0)
+                        acts[i] = torch.Tensor(acts[i])
                     mdp_data["obss"] = obss
-                    
-                    f.seek(0)
+                    mdp_data["acts"] = acts
+
+                    # f.seek(0)
                     pickle.dump(mdp_data, f)
                     print(binary_data_dir)
                     
